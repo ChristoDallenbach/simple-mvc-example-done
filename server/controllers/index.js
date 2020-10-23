@@ -3,15 +3,22 @@ const models = require('../models');
 
 // get the Cat model
 const Cat = models.Cat.CatModel;
+const Dog = models.Dog.DogModel;
 
 // default fake data so that we have something to work with until we make a real Cat
-const defaultData = {
+const defaultDataCat = {
   name: 'unknown',
   bedsOwned: 0,
 };
 
+const defaultDataDog = {
+  name: 'unknown',
+  breed: 'unknown',
+  age: 0,
+}
+
 // object for us to keep track of the last Cat we made and dynamically update it sometimes
-let lastAdded = new Cat(defaultData);
+let lastAdded = new Cat(defaultDataCat);
 
 // function to handle requests to the main page
 // controller functions in Express receive the full HTTP request
@@ -45,6 +52,9 @@ const readAllCats = (req, res, callback) => {
   Cat.find(callback).lean();
 };
 
+const readAllDogs = (req, res, callback) => {
+  Dog.find(callback).lean();
+}
 
 // function to find a specific cat on request.
 // Express functions always receive the request and the response.
@@ -68,6 +78,20 @@ const readCat = (req, res) => {
   // Behind the scenes this runs the findOne method.
   // You can find the findByName function in the model file.
   Cat.findByName(name1, callback);
+};
+
+const readDog = (req, res) => {
+  const name1 = req.query.name;
+    
+  const callback = (err, doc) => {
+    if(err) {
+        return res.status(500).json({err});
+    }
+      
+    return res.json(doc);
+  };
+    
+  Dog.findByName(name1, callback);
 };
 
 // function to handle requests to the page1 page
@@ -105,14 +129,27 @@ const hostPage2 = (req, res) => {
 // controller functions in Express receive the full HTTP request
 // and a pre-filled out response object to send
 const hostPage3 = (req, res) => {
-    // res.render takes a name of a page to render.
-    // These must be in the folder you specified as views in your main app.js file
-    // Additionally, you don't need .jade because you registered the file type
-    // in the app.js as jade. Calling res.render('index')
-    // actually calls index.jade. A second parameter of JSON can be passed
-    // into the jade to be used as variables with #{varName}
+  // res.render takes a name of a page to render.
+  // These must be in the folder you specified as views in your main app.js file
+  // Additionally, you don't need .jade because you registered the file type
+  // in the app.js as jade. Calling res.render('index')
+  // actually calls index.jade. A second parameter of JSON can be passed
+  // into the jade to be used as variables with #{varName}
   res.render('page3');
 };
+
+const hostPage4 = (req, res) => {
+  const callback = (err, docs) => {
+    if (err) {
+      return res.status(500).json({ err }); // if error, return it
+    }
+
+    // return success
+    return res.render('page4', { dogs: docs });
+  };
+
+  readAllDogs(req, res, callback);
+}
 
 // function to handle get request to send the name
 // controller functions in Express receive the full HTTP request
@@ -168,6 +205,27 @@ const setName = (req, res) => {
   return res;
 };
 
+const setNameDog = () => {
+  if (!req.body.firstname || !req.body.lastname || !req.body.breed || !req.body.age) {
+    return res.status(400).json({ error: 'firstname, lastname, breed, and age are all required' });
+  }
+    
+  const name = `${req.body.firstname} ${req.body.lastname}`;
+    
+  const dogData = {
+    name,
+    breed: req.body.breed,
+    age: req.body.age,
+  };
+    
+  const newDog = new Dog(dogData);
+    
+  const savePromiseDog = newDog.save();
+    
+  savePromiseDog.catch((err) => res.status(500).json({ err }));
+    
+  return res;
+}
 
 // function to handle requests search for a name and return the object
 // controller functions in Express receive the full HTTP request
@@ -205,6 +263,22 @@ const searchName = (req, res) => {
 
     // if a match, send the match back
     return res.json({ name: doc.name, beds: doc.bedsOwned });
+  });
+};
+
+const searchNameDog = (req, res) => {
+  if (!req.query.name) {
+    return res.status(400).json({ error: 'Name is required to perform a search' });
+  } 
+    
+  return Dog.findByName(req.query.name, (err, doc) => {
+    if(err) {
+      return res.status(500).json({ err });
+    }    
+      
+    if(!doc) {
+      return res.json({ name: doc.name, breed: doc.breed, age: doc.age });
+    }
   });
 };
 
@@ -255,10 +329,14 @@ module.exports = {
   page1: hostPage1,
   page2: hostPage2,
   page3: hostPage3,
+  page4: hostPage4,
   readCat,
+  readDog,
   getName,
   setName,
+  setNameDog,
   updateLast,
   searchName,
+  searchNameDog,
   notFound,
 };
