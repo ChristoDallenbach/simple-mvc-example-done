@@ -11,12 +11,6 @@ const defaultDataCat = {
   bedsOwned: 0,
 };
 
-const defaultDataDog = {
-  name: 'unknown',
-  breed: 'unknown',
-  age: 0,
-}
-
 // object for us to keep track of the last Cat we made and dynamically update it sometimes
 let lastAdded = new Cat(defaultDataCat);
 
@@ -205,7 +199,7 @@ const setName = (req, res) => {
   return res;
 };
 
-const setNameDog = () => {
+const setNameDog = (req, res) => {
   if (!req.body.firstname || !req.body.lastname || !req.body.breed || !req.body.age) {
     return res.status(400).json({ error: 'firstname, lastname, breed, and age are all required' });
   }
