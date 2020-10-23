@@ -274,14 +274,14 @@ const searchNameDog = (req, res) => {
       return res.json({ error: 'No dogs found' });
     }
      
-    const updateDog = new Dog(doc);
+    const uDog = new Dog(doc);
       
-    updateDog.age = updateDog.age+1;
+    uDog.age = uDog.age+1;
       
-    const savePromiseUpdate = updateDog.save();
+    const savePromiseUpdate = uDog.save();
       
     savePromiseUpdate.then(() => {
-      return res.json({ name: updateDog.name, breed: updateDog.breed, age: updateDog.age });
+      return res.json({ name: uDog.name, breed: uDog.breed, age: uDog.age });
     });  
       
     savePromiseUpdate.catch((e) => res.status(500).json({ e }));
