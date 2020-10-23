@@ -281,7 +281,7 @@ const searchNameDog = (req, res) => {
     const savePromiseUpdate = updateDog.save();
       
     savePromiseUpdate.then(() => {
-      return res.json({ name: doc.name, breed: doc.breed, age: doc.age });
+      return res.json({ name: updateDog.name, breed: updateDog.breed, age: updateDog.age });
     });  
       
     savePromiseUpdate.catch((e) => res.status(500).json({ e }));
