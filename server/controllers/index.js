@@ -280,6 +280,8 @@ const searchNameDog = (req, res) => {
       
     const savePromiseUpdate = updateDog.save();
       
+    savePromiseUpdate.catch((err) => return res.status(500).json({ err }));
+      
     return res.json({ name: doc.name, breed: doc.breed, age: doc.age });
   });
 };
